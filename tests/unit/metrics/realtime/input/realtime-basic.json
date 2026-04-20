@@ -1,0 +1,19 @@
+{
+  "uuid": 1,
+  "interfaces": [
+    {
+      "name": "WAN",
+      "role": "upstream",
+      "proto": "dhcp"
+    }
+  ],
+  "metrics": {
+    "realtime": {
+      "types": [
+        "client.associate",
+        "wifi.start",
+        "dhcp.ack"
+      ]
+    }
+  }
+}

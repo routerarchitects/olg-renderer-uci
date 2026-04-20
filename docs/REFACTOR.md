@@ -1,0 +1,441 @@
+# Template Refactoring Process
+
+This document outlines the standardized process for refactoring ucode templates to follow the new design patterns while maintaining comprehensive test coverage and schema documentation.
+
+This process applies to:
+- **Service templates** (`renderer/templates/services/`) - Service-specific configurations
+- **Metric templates** (`renderer/templates/metric/`) - Metrics and monitoring configurations  
+- **Base templates** (`renderer/templates/`) - Core system templates (interface, radio, etc.)
+
+## Overview
+
+Template refactoring follows a **test-driven approach** with a structured 3-step workflow:
+
+1. **First Commit**: Create comprehensive test cases for existing template behavior
+2. **Second Commit**: Refactor template to new patterns while maintaining identical functionality  
+3. **Third Commit**: Validate and enhance service schema documentation
+
+This approach ensures:
+- **Zero regression risk** - Tests validate functional equivalence 
+- **Clear change tracking** - Each step is isolated and reviewable
+- **Comprehensive coverage** - All template scenarios are tested
+- **Documentation of behavior** - Tests serve as living specification
+- **Schema consistency** - All configuration fields are properly documented
+
+## Workflow
+
+### Step 1: Create Test Cases
+
+**Commit Pattern**: 
+- Services: `tests: add [service] test cases`  
+- Metrics: `tests: add [metric] metric test cases`
+- Base: `tests: add [base] base template test cases`
+
+**Objective**: Build comprehensive test suite that captures current template behavior exactly.
+
+**Process**:
+
+1. **Create test directory structure**:
+   
+   **For Services:**
+   ```
+   tests/unit/services/[service]/
+   ├── input/           # JSON test fixtures
+   ├── output/          # Expected UCI/file outputs  
+   └── test-[service].uc # Test script
+   ```
+   
+   **For Metrics:**
+   ```
+   tests/unit/metrics/[metric]/
+   ├── input/           # JSON test fixtures
+   ├── output/          # Expected UCI outputs  
+   └── test-[metric].uc # Test script
+   ```
+   
+   **For Base Templates:**
+   ```
+   tests/unit/base/[template]/
+   ├── input/           # JSON test fixtures
+   ├── output/          # Expected UCI/file outputs  
+   └── test-[template].uc # Test script
+   ```
+
+2. **Design test scenarios** covering:
+   
+   **For Services:**
+   - Basic functionality with standard configuration
+   - Edge cases (disabled, restricted, invalid configs)
+   - Multiple interfaces/complex configurations  
+   - Error conditions and warnings
+   - Custom ports, settings, authentication modes
+   
+   **For Metrics:**
+   - Basic metrics configuration with standard intervals and types
+   - Edge cases (disabled metrics, empty type lists)
+   - Complex filter configurations and multiple types
+   - Interface-specific metrics (where applicable)
+   - Custom intervals and thresholds
+   
+   **For Base Templates:**
+   - Core system configurations (interfaces, radios, switches)
+   - Multiple interface types (upstream, downstream, etc.)
+   - Complex VLAN and bridge configurations
+   - Radio band and channel settings
+   - Error conditions and validation scenarios
+
+3. **Generate expected outputs** by running existing template against test fixtures
+
+4. **Validate comprehensive coverage** - all major code paths should be exercised
+
+**Reference**: Follow guidelines in [docs/TESTING.md](./TESTING.md) for:
+- Test case design patterns
+- Mock environment setup
+- File generation validation
+- Test script structure
+
+**Important**: If you encounter missing mock functionality during test development, **do not implement empty/stub mocks**. Instead, stop and request guidance for implementing a proper mock that accurately simulates the real system behavior. Empty mocks can hide template issues and lead to false confidence in test results.
+
+**Git Workflow**: 
+```bash
+# For services
+git add tests/unit/services/[service]/
+git commit -s -m "tests: add [service] test cases
+
+- Add comprehensive test coverage for [service] service template
+- [List specific test scenarios]
+- All test cases pass against current template"
+
+# For metrics  
+git add tests/unit/metrics/[metric]/
+git commit -s -m "tests: add [metric] metric test cases
+
+- Add comprehensive test coverage for [metric] metrics template
+- [List specific test scenarios]
+- All test cases pass against current template"
+
+# For base templates
+git add tests/unit/base/[template]/
+git commit -s -m "tests: add [template] base template test cases
+
+- Add comprehensive test coverage for [template] base template
+- [List specific test scenarios]
+- All test cases pass against current template"
+```
+
+**Deliverable**: Complete test suite with **all tests passing** against current template and **committed to git**.
+
+### Step 2: Refactor Template  
+
+**Commit Pattern**: 
+- Services: `services/[service]: update to new templating pattern`
+- Metrics: `metrics/[metric]: update to new templating pattern`
+- Base: `base/[template]: update to new templating pattern`
+
+**Objective**: Modernize template code organization while preserving exact functional behavior.
+
+**Process**:
+
+1. **Analyze current template** structure and logic flow
+
+2. **Refactor using new patterns**:
+   - Extract constants (arrays/objects only)
+   - Organize helper functions by prefix (`has_`, `is_`, `validate_`, etc.)
+   - Create focused generation functions using UCI helpers
+   - Add traceability comments
+   - Implement early validation with guard clauses
+
+3. **Update expected test outputs** to match new format:
+   - File headers: `# generated by [template].uc`
+   - Section comments: `### generate [description]`
+   - UCI helper output formatting
+   - File content validation blocks
+
+4. **Validate functional equivalence** - all tests must pass with updated outputs
+
+**Reference**: Follow patterns in [docs/TEMPLATES.md](./TEMPLATES.md) for:
+- Code organization structure
+- Helper function naming conventions  
+- UCI helper usage
+- Traceability comment hierarchy
+- Error handling patterns
+
+**Git Workflow**:
+```bash
+# For services
+git add renderer/templates/services/[service].uc tests/unit/services/[service]/output/
+git commit -s -m "services/[service]: update to new templating pattern
+
+- Organize helper functions by prefix (has_, is_, validate_)
+- Extract configuration generation into focused functions
+- Use UCI helpers for consistent output formatting
+- Add traceability comments for debugging
+- Implement early validation with proper error handling
+- All tests pass with updated expected outputs"
+
+# For metrics
+git add renderer/templates/metric/[metric].uc tests/unit/metrics/[metric]/output/
+git commit -s -m "metrics/[metric]: update to new templating pattern
+
+- Organize helper functions by prefix (has_, is_, validate_)
+- Extract configuration generation into focused functions
+- Use UCI helpers for consistent output formatting
+- Add traceability comments for debugging
+- Implement early validation with proper error handling
+- All tests pass with updated expected outputs"
+
+# For base templates
+git add renderer/templates/[template].uc tests/unit/base/[template]/output/
+git commit -s -m "base/[template]: update to new templating pattern
+
+- Organize helper functions by prefix (has_, is_, validate_)
+- Extract configuration generation into focused functions
+- Use UCI helpers for consistent output formatting
+- Add traceability comments for debugging
+- Implement early validation with proper error handling
+- All tests pass with updated expected outputs"
+```
+
+**Deliverable**: Refactored template with **all tests passing** and modern code organization, **committed to git**.
+
+### Step 3: Validate Schema Documentation
+
+**Commit Pattern**: 
+- Services: `schema: validate [service] field descriptions`
+- Metrics: `schema: validate [metric] metrics field descriptions`
+- Base: `schema: validate [component] field descriptions`
+
+**Objective**: Ensure all configuration fields have clear, comprehensive descriptions in the schema.
+
+**Process**:
+
+1. **Locate schema files**:
+   - Services: `schema/service.[service].yml`
+   - Metrics: `schema/metrics.[metric].yml` or `schema/metrics.yml` (main metrics schema)
+
+2. **Review all configuration fields** and validate each has:
+   - **Clear description** explaining the field's purpose and behavior
+   - **Proper examples** where helpful (especially for complex fields)
+   - **Note**: Only descriptions may be improved - do NOT add constraints, modify defaults, or make other schema changes
+
+3. **Schema Description Quality Standards**:
+   - **Purpose**: What does this field control/configure?
+   - **Behavior**: How does it affect system operation?
+   - **Context**: When would you use this setting?
+   - **Examples**: Show realistic usage (for complex fields)
+   - **Important**: Focus only on improving description text - do not modify constraints, defaults, or other schema properties
+
+4. **Enhancement Examples**:
+   ```yaml
+   # Poor description
+   port:
+     description: SSH port
+     type: integer
+     default: 22
+   
+   # Good description (only description improved)
+   port:
+     description: |
+       This option defines which network port the SSH server shall be available on.
+       Standard SSH port is 22, but can be changed for security purposes.
+       Example: Set to 2222 for non-standard SSH access.
+     type: integer
+     default: 22
+   ```
+
+5. **Update missing or inadequate descriptions** to meet quality standards (descriptions only - no other schema changes)
+
+**Git Workflow**:
+```bash
+# For services
+git add schema/service.[service].yml
+git commit -s -m "schema: validate [service] field descriptions
+
+- Review all [service] service configuration fields 
+- Enhance field descriptions with clear purpose and behavior explanations
+- Add examples for complex fields where helpful
+- All [service] configuration options now have comprehensive documentation"
+
+# For metrics
+git add schema/metrics.[metric].yml
+git commit -s -m "schema: validate [metric] metrics field descriptions
+
+- Review all [metric] metrics configuration fields
+- Enhance field descriptions with clear purpose and behavior explanations  
+- Add examples for complex fields where helpful
+- All [metric] configuration options now have comprehensive documentation"
+```
+
+**Deliverable**: Schema files with **comprehensive field descriptions** meeting documentation standards, **committed to git**.
+
+## Commit Message Examples
+
+### Test Creation Commit
+
+**Service Example:**
+```
+tests: add ssh test cases
+
+- Add comprehensive test coverage for SSH service template
+- Test basic SSH with multiple interfaces and authorized keys  
+- Test custom port configuration with single interface
+- Test SSH restriction policy with warning validation
+- Test disabled SSH (no interfaces configured)
+- All 4 test cases pass against current template
+```
+
+**Metric Example:**
+```
+tests: add health metric test cases
+
+- Add comprehensive test coverage for health metrics template
+- Test basic health monitoring with all check types enabled
+- Test selective health monitoring with custom intervals
+- Test disabled health monitoring (no configuration)
+- Test edge cases with individual health check configurations
+- All 4 test cases pass against current template
+```
+
+### Template Refactoring Commit
+
+**Service Example:**
+```
+services/ssh: update to new templating pattern
+
+- Organize helper functions by prefix (has_, is_, validate_)
+- Extract configuration generation into focused functions
+- Use UCI helpers for consistent output formatting
+- Add traceability comments for debugging
+- Implement early validation with proper error handling
+- All tests pass with updated expected outputs
+```
+
+**Metric Example:**
+```
+metrics/health: update to new templating pattern
+
+- Organize helper functions by prefix (has_, is_, validate_)
+- Extract configuration generation into focused functions
+- Use UCI helpers for consistent output formatting
+- Add traceability comments for debugging
+- Implement early validation with proper error handling
+- All tests pass with updated expected outputs
+```
+
+### Schema Validation Commit
+
+**Service Example:**
+```
+schema: validate ssh field descriptions
+
+- Review all SSH service configuration fields in schema/service.ssh.yml
+- Enhance field descriptions with clear purpose and behavior explanations
+- Add examples for complex fields like authorized-keys array
+- Ensure all constraints and defaults are properly documented
+- All SSH configuration options now have comprehensive documentation
+```
+
+**Metric Example:**
+```
+schema: validate health metrics field descriptions
+
+- Review all health metrics configuration fields in schema/metrics.health.yml
+- Enhance field descriptions with clear purpose and behavior explanations
+- Add examples for complex fields like check intervals and thresholds
+- Ensure all constraints and defaults are properly documented
+- All health metrics configuration options now have comprehensive documentation
+```
+
+**Important**: Do not add any AI assistant references (like "Generated with Claude Code") to commit messages. Keep commit messages focused on the technical changes made.
+
+## Quality Gates
+
+### Before Step 1 (Test Creation)
+- [ ] Template functionality is well understood
+- [ ] All major use cases are identified
+- [ ] Mock environment supports template dependencies
+
+### After Step 1 (Test Creation)  
+- [ ] All test cases pass against current template
+- [ ] Test coverage includes edge cases and error conditions
+- [ ] Expected outputs capture complete template behavior
+- [ ] File generation is properly validated (if applicable)
+
+### After Step 2 (Template Refactoring)
+- [ ] All test cases pass with refactored template
+- [ ] Template follows new design patterns from TEMPLATES.md
+- [ ] Code is well-organized with clear separation of concerns
+- [ ] Traceability comments enable easy debugging
+- [ ] No functional behavior changes (only structural improvements)
+
+### After Step 3 (Schema Validation)
+- [ ] All service configuration fields have clear descriptions
+- [ ] Descriptions explain purpose, behavior, and usage context
+- [ ] Complex fields include helpful examples
+- [ ] Constraints and defaults are properly documented
+- [ ] Schema serves as comprehensive configuration reference
+
+## Benefits of This Process
+
+1. **Risk Mitigation**: Tests prevent regressions during refactoring
+2. **Documentation**: Test cases document expected template behavior  
+3. **Maintainability**: Refactored templates are easier to understand and modify
+4. **Consistency**: Standardized patterns across all templates
+5. **Debuggability**: Traceability comments enable efficient troubleshooting
+6. **Reviewability**: Clear separation allows focused review of each step
+7. **Schema Documentation**: Complete configuration reference for users and integrations
+
+## Example Workflow: SSH Service
+
+See recent commits for SSH service refactoring:
+
+1. `8556b89 tests: add ssh test cases` 
+   - Created 4 comprehensive test scenarios
+   - Enhanced files mock for authorized_keys validation
+   - All tests pass against original template
+
+2. `99649cc services/ssh: update to new templating pattern`
+   - Refactored to helper functions and generation functions  
+   - Added UCI helpers and traceability comments
+   - Updated expected outputs for new format
+   - All 4 tests continue to pass
+
+3. `[future] schema: validate ssh field descriptions`
+   - Review schema/service.ssh.yml field descriptions
+   - SSH schema already has good descriptions for all fields
+   - Ensure consistency with refactored template behavior
+   - All configuration options properly documented
+
+This process has been successfully applied to:
+
+**Services:**
+- IEEE 802.1X service (commits 02fbc95, 5dcdb5a)
+- SSH service (commits 8556b89, 99649cc)  
+- MDNS service (commits ab8bef1, 7f6962a, 57fe465)
+- NTP service (commits 788c368, 41762f0, [schema validation pending])
+- RRM service (commits 7282bd7, 0d2c872, a0f469c)
+- Log service (earlier refactoring)
+- LLDP service (earlier refactoring)
+
+**Metrics:**
+- No metric templates have been refactored yet
+
+## Next Steps
+
+Continue applying this process to remaining templates:
+
+**Services:**
+- RADIUS service  
+- QoS service
+- And others as identified
+
+**Metrics:**
+- Health metrics (`renderer/templates/metric/health.uc`)
+- Statistics metrics (`renderer/templates/metric/statistics.uc`)
+- Telemetry metrics (`renderer/templates/metric/telemetry.uc`)
+- DHCP snooping metrics (`renderer/templates/metric/dhcp_snooping.uc`)
+- WiFi frames metrics (`renderer/templates/metric/wifi_frames.uc`)
+- WiFi scan metrics (`renderer/templates/metric/wifi_scan.uc`)
+- Realtime metrics (`renderer/templates/metric/realtime.uc`)
+
+Each refactoring follows the same proven 3-step pattern: comprehensive tests first, then structural improvements while maintaining functional equivalence, followed by schema validation to ensure complete documentation.
