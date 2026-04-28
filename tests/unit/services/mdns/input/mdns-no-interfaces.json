@@ -1,0 +1,23 @@
+{
+  "uuid": 1,
+  "interfaces": [
+    {
+      "name": "WAN",
+      "role": "upstream",
+      "services": [],
+      "ethernet": [
+        {
+          "select-ports": [
+            "WAN"
+          ]
+        }
+      ],
+      "ipv4": {
+        "addressing": "dynamic"
+      }
+    }
+  ],
+  "services": {
+    "mdns": {}
+  }
+}

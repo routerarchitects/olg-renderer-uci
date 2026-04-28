@@ -1,0 +1,21 @@
+{
+  "uuid": 1,
+  "interfaces": [
+    {
+      "name": "WAN",
+      "role": "upstream",
+      "proto": "dhcp"
+    }
+  ],
+  "metrics": {
+    "statistics": {
+      "interval": 120,
+      "types": [
+        "ssids",
+        "lldp",
+        "clients",
+        "tid-stats"
+      ]
+    }
+  }
+}

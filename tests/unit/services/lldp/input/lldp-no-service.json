@@ -1,0 +1,22 @@
+{
+  "services": {
+    "lldp": {
+      "describe": "Test AP",
+      "location": "Test Location"
+    }
+  },
+  "interfaces": [
+    {
+      "role": "upstream",
+      "services": [],
+      "ethernet": [
+        {
+          "select_ports": [
+            "WAN"
+          ]
+        }
+      ]
+    }
+  ],
+  "uuid": 1
+}
